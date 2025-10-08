@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vision of Ethiopia Film School — Admin</title>
+<style>
+  /* --- Theme: Black & Gold --- */
+  :root{
+    --bg:#0b0b0b; --card:#0f0f10; --muted:#bfb3a0; --gold:#c9a64b; --gold-weak:#d9bf70;
+    --accent:#c9a64b;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,#070707 0%, #0d0d0d 100%);color:#fff}
+  .wrap{max-width:1150px;margin:18px auto;padding:18px}
+  header{display:flex;align-items:center;gap:14px}
+  .logo{width:72px;height:72px;border-radius:8px;overflow:hidden;flex:0 0 72px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#000,#111);border:1px solid rgba(255,255,255,0.03)}
+  .logo img{width:100%;height:100%;object-fit:contain}
+  h1{margin:0;font-size:20px;letter-spacing:0.6px}
+  .sub{color:var(--muted);font-size:13px}
+  nav{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  nav button{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--gold);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:12px;margin-top:14px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .col{flex:1}
+  label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+  input[type=text],input[type=date],input[type=tel],input[type=number],select,textarea{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:10px;border-radius:8px;width:100%;box-sizing:border-box}
+  textarea{min-height:64px}
+  button.primary{background:linear-gradient(90deg,var(--gold),var(--gold-weak));color:#0b0b0b;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.05);color:var(--muted);padding:8px 10px;border-radius:8px}
+  .cards{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .stat{flex:1;min-width:180px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.1));border:1px solid rgba(255,255,255,0.02)}
+  .stat h3{margin:0;color:var(--gold);font-size:18px}
+  .stat p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+  .muted{color:var(--muted);font-size:13px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left;font-size:14px}
+  th{color:var(--muted);font-weight:600}
+  .thumb{width:56px;height:40px;object-fit:cover;border-radius:6px}
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .gallery-grid img{width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+  .watermark{pointer-events:none;position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.06;z-index:0}
+  .watermark img{width:50vmin;max-width:700px;filter:grayscale(0) contrast(0.8) saturate(0.2)}
+  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="watermark" id="watermarkWrap" style="display:none">
+    <img id="watermarkImg" src="" alt="watermark">
+  </div>
+
+  <div class="wrap" id="app">
+    <header>
+      <div class="logo" title="VEFS logo">
+        <img id="headerLogo" src="" alt="VEFS Logo">
+      </div>
+      <div>
+        <h1>Vision of Ethiopia Film School</h1>
+        <div class="sub">Cinema • Training • Community — Manage students, payments & gallery</div>
+      </div>
+      <div style="margin-left:auto">
+        <label class="muted" style="font-size:12px">Logo (upload to apply)</label>
+        <input type="file" id="logoUpload" accept="image/*" style="display:block">
+      </div>
+    </header>
+
+    <nav aria-label="main navigation">
+      <button id="navDashboard">Dashboard</button>
+      <button id="navRegister">Register</button>
+      <button id="navPayments">Payments</button>
+      <button id="navGallery">Gallery</button>
+      <button id="navVerify">Verify</button>
+      <button id="navAdmin">Admin</button>
+    </nav>
+
+    <div class="grid" style="position:relative;margin-top:12px">
+      <main class="card" id="mainPanel" style="z-index:2">
+        <!-- DASHBOARD -->
+        <section id="panelDashboard">
+          <h2 style="margin:0 0 6px 0;color:var(--gold)">Dashboard</h2>
+          <div class="muted">Overview of registrations and payments</div>
+
+          <div class="cards">
+            <div class="stat">
+              <h3 id="cardTotal">0</h3>
+              <p>Total Students</p>
+            </div>
+            <div class="stat">
+              <h3 id="cardPending">0</h3>
+              <p>Pending Payments</p>
+            </div>
+            <div class="stat">
+              <h3 id="cardVerified">0</h3>
+              <p>Verified Payments</p>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <canvas id="enrollChart" width="600" height="200" style="max-width:100%;background:transparent;border-radius:8px"></canvas>
+          </div>
+        </section>
+
+        <!-- REGISTER -->
+        <section id="panelRegister" style="display:none">
+          <h2 style="margin:0 0 6px 0;color:var(--gold)">Register Student</h2>
+          <div class="muted">Add a new student to the system</div>
+
+          <form id="regForm" style="margin-top:10px">
+            <div class="row">
+              <div class="col">
+                <label>Full name *</label>
+                <input id="studentName" required>
+              </div>
+              <div class="col">
+                <label>DOB *</label>
+                <input id="dob" type="date" required>
+              </div>
+              <div class="col">
+                <label>Gender *</label>
+                <select id="gender" required><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:8px">
+              <div class="col">
+                <label>Grade / Program *</label>
+                <input id="grade" required placeholder="e.g. Film Editing">
+              </div>
+              <div class="col">
+                <label>Contact</label>
+                <input id="contact">
+              </div>
+              <div class="col">
+                <label>Admission Date</label>
+                <input id="admitDate" type="date">
+              </div>
+            </div>
+
+            <div style="margin-top:8px">
+              <label>Photo (optional)</label>
+              <input id="photo" type="file" accept="image/*">
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+              <button class="primary" type="submit">Save Student</button>
+              <button class="ghost" type="button" id="regReset">Reset</button>
+              <div class="muted" style="margin-left:auto">Student ID auto-generated</div>
+            </div>
+          </form>
+
+          <section style="margin-top:12px">
+            <h3 style="margin:0;color:var(--gold)">Recent Students</h3>
+            <table id="studentsTable">
+              <thead><tr><th>Photo</th><th>ID</th><th>Name</th><th>Grade</th><th>Payment</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </section>
+        </section>
+
+        <!-- PAYMENTS -->
+        <section id="panelPayments" style="display:none">
+          <h2 style="margin:0 0 6px 0;color:var(--gold)">Upload Payment Proof</h2>
+          <div class="muted">Students upload proof — admin reviews</div>
+
+          <form id="payForm" style="margin-top:10px">
+            <div class="row">
+              <div class="col">
+                <label>Student ID or Name *</label>
+                <input id="pStudent" required placeholder="e.g. 2025-0001">
+              </div>
+              <div class="col">
+                <label>Bank *</label>
+                <input id="pBank" required>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:8px">
+              <div class="col"><label>Transaction Ref *</label><input id="pRef" required></div>
+              <div class="col"><label>Amount (ETB) *</label><input id="pAmount" type="number" required></div>
+              <div class="col"><label>Date *</label><input id="pDate" type="date" required></div>
+            </div>
+
+            <div style="margin-top:8px">
+              <label>Screenshot *</label>
+              <input id="pImage" type="file" accept="image/*" required>
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+              <button class="primary" type="submit">Submit Payment Proof</button>
+              <button class="ghost" type="button" id="viewAllPayments">View All</button>
+            </div>
+            <div id="pResult" style="margin-top:8px" class="muted"></div>
+          </form>
+        </section>
+
+        <!-- GALLERY -->
+        <section id="panelGallery" style="display:none">
+          <h2 style="margin:0 0 6px 0;color:var(--gold)">Gallery</h2>
+          <div class="muted">Upload photos from classes or films</div>
+
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <input id="galleryInput" type="file" accept="image/*" multiple>
+            <button class="primary" id="uploadGallery">Upload</button>
+            <button class="ghost" id="clearGallery">Clear Gallery</button>
+          </div>
+
+          <div style="margin-top:10px" class="gallery-grid" id="galleryGrid"></div>
+        </section>
+
+        <!-- VERIFY -->
+        <section id="panelVerify" style="display:none">
+          <h2 style="margin:0 0 6px 0;color:var(--gold)">Verify Student / Certificate</h2>
+          <div class="muted">Enter Student ID to check registration & payment</div>
+
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <input id="verifyInput" placeholder="e.g. 2025-0001" style="flex:1">
+            <button class="primary" id="verifyBtn">Verify</button>
+          </div>
+          <div id="verifyResult" style="margin-top:12px"></div>
+        </section>
+
+        <!-- ADMIN -->
+        <section id="panelAdmin" style="display:none">
+          <h2 style="margin:0 0 6px 0;color:var(--gold)">Admin Dashboard</h2>
+          <div class="muted">Login below (demo). For production we will add real auth.</div>
+
+          <div id="adminGate" style="margin-top:8px">
+            <label>Admin password</label>
+            <input id="adminPw" type="password" placeholder="demo: admin123">
+            <div style="margin-top:8px"><button class="primary" id="adminLogin">Login</button></div>
+          </div>
+
+          <div id="adminPanel" style="display:none;margin-top:12px">
+            <h3 style="margin:0 0 8px 0;color:var(--gold)">Pending Payments</h3>
+            <table id="paymentsTable">
+              <thead><tr><th>Preview</th><th>Student</th><th>Bank/Ref</th><th>Amt</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="ghost" id="exportStudents">Export Students CSV</button>
+              <button class="ghost" id="exportPayments">Export Payments CSV</button>
+              <button class="ghost" id="logoutAdmin">Logout</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Right column -->
+      <aside class="card" style="z-index:2">
+        <h3 style="margin:0 0 8px 0;color:var(--gold)">Quick Actions</h3>
+        <div class="muted">Jump to sections and statistics</div>
+
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+          <button class="ghost" id="dashOpen">Open Dashboard</button>
+          <button class="ghost" id="regOpen">Register Student</button>
+          <button class="ghost" id="payOpen">Upload Payment</button>
+          <button class="ghost" id="galOpen">Open Gallery</button>
+          <button class="ghost" id="verifyOpen">Verify Student</button>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+        <div>
+          <h4 style="margin:6px 0;color:var(--gold)">Brand</h4>
+          <div class="muted">Logo will be used as header & watermark (faded)</div>
+          <div style="margin-top:8px"><img id="sideLogo" src="" alt="logo" style="width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.03)"></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>Vision of Ethiopia Film School — Black & Gold theme • Demo offline app</footer>
+  </div>
+
+<script>
+/* -------------- Storage keys -------------- */
+const KEY_ENTRIES = 'vefs_students_v1';
+const KEY_PAYMENTS = 'vefs_payments_v1';
+const KEY_GALLERY = 'vefs_gallery_v1';
+const KEY_LOGO = 'vefs_logo_v1';
+
+/* -------------- In-memory data -------------- */
+let students = JSON.parse(localStorage.getItem(KEY_ENTRIES) || '[]');
+let payments = JSON.parse(localStorage.getItem(KEY_PAYMENTS) || '[]');
+let gallery = JSON.parse(localStorage.getItem(KEY_GALLERY) || '[]');
+let logoData = localStorage.getItem(KEY_LOGO) || null;
+let adminLogged = false;
+
+/* -------------- Helpers -------------- */
+function saveAll(){
+  localStorage.setItem(KEY_ENTRIES, JSON.stringify(students));
+  localStorage.setItem(KEY_PAYMENTS, JSON.stringify(payments));
+  localStorage.setItem(KEY_GALLERY, JSON.stringify(gallery));
+}
+function saveLogo(dataUrl){
+  logoData = dataUrl;
+  localStorage.setItem(KEY_LOGO, dataUrl);
+  applyLogo();
+}
+function formatDate(d){ if(!d) return ''; const dt=new Date(d); return dt.toLocaleDateString(); }
+function cryptoId(){ return 'id-' + Math.random().toString(36).slice(2,10); }
+function generateStudentId(){
+  const year = new Date().getFullYear();
+  const base = students.filter(s=>s.studentId && s.studentId.startsWith(year+'-')).length + 1;
+  return `${year}-${String(base).padStart(4,'0')}`;
+}
+function fileToBase64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+/* -------------- Logo handling -------------- */
+const headerLogo = document.getElementById('headerLogo');
+const sideLogo = document.getElementById('sideLogo');
+const watermarkWrap = document.getElementById('watermarkWrap');
+const watermarkImg = document.getElementById('watermarkImg');
+
+function applyLogo(){
+  if(logoData){
+    headerLogo.src = logoData;
+    sideLogo.src = logoData;
+    watermarkImg.src = logoData;
+    watermarkWrap.style.display = '';
+  } else {
+    headerLogo.src = '';
+    sideLogo.src = '';
+    watermarkImg.src = '';
+    watermarkWrap.style.display = 'none';
+  }
+}
+document.getElementById('logoUpload').addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const data = await fileToBase64(f);
+  saveLogo(data);
+  alert('Logo uploaded and applied as watermark/header.');
+});
+applyLogo();
+
+/* -------------- Navigation -------------- */
+const panels = {
+  dashboard: document.getElementById('panelDashboard'),
+  register: document.getElementById('panelRegister'),
+  payments: document.getElementById('panelPayments'),
+  gallery: document.getElementById('panelGallery'),
+  verify: document.getElementById('panelVerify'),
+  admin: document.getElementById('panelAdmin')
+};
+function showPanel(name){
+  Object.values(panels).forEach(p=>p.style.display='none');
+  if(name === 'admin' && !adminLogged){ panels.admin.querySelector('#adminGate').style.display=''; panels.admin.querySelector('#adminPanel').style.display='none'; }
+  panels[name].style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('navDashboard').onclick = ()=> showPanel('dashboard');
+document.getElementById('navRegister').onclick = ()=> showPanel('register');
+document.getElementById('navPayments').onclick = ()=> showPanel('payments');
+document.getElementById('navGallery').onclick = ()=> showPanel('gallery');
+document.getElementById('navVerify').onclick = ()=> showPanel('verify');
+document.getElementById('navAdmin').onclick = ()=> showPanel('admin');
+document.getElementById('dashOpen').onclick = ()=> showPanel('dashboard');
+document.getElementById('regOpen').onclick = ()=> showPanel('register');
+document.getElementById('payOpen').onclick = ()=> showPanel('payments');
+document.getElementById('galOpen').onclick = ()=> showPanel('gallery');
+document.getElementById('verifyOpen').onclick = ()=> showPanel('verify');
+
+/* -------------- Dashboard render & Chart -------------- */
+const cardTotal = document.getElementById('cardTotal');
+const cardPending = document.getElementById('cardPending');
+const cardVerified = document.getElementById('cardVerified');
+const chartCanvas = document.getElementById('enrollChart');
+
+function updateDashboard(){
+  cardTotal.textContent = students.length;
+  const pending = payments.filter(p=>p.status === 'Pending').length;
+  const verified = payments.filter(p=>p.status === 'Approved').length;
+  cardPending.textContent = pending;
+  cardVerified.textContent = verified;
+  drawEnrollmentChart();
+}
+
+function drawEnrollmentChart(){
+  // Simple bar chart: counts per grade (top 6)
+  const ctx = chartCanvas.getContext('2d');
+  ctx.clearRect(0,0,chartCanvas.width,chartCanvas.height);
+  const counts = {};
+  students.forEach(s=> counts[s.grade] = (counts[s.grade]||0)+1);
+  const entriesArr = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const labels = entriesArr.map(e=>e[0] || '—');
+  const values = entriesArr.map(e=>e[1]);
+  // draw axes and bars
+  const w = chartCanvas.width, h = chartCanvas.height;
+  ctx.font = '12px Inter';
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(0,0,w,h);
+  if(values.length === 0){
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillText('No enrollment data yet', 12, 24);
+    return;
+  }
+  const max = Math.max(...values);
+  const padding = 40; const barW = (w - padding*2) / values.length * 0.6;
+  values.forEach((val,i)=>{
+    const x = padding + i * ((w - padding*2)/values.length) + ((w - padding*2)/values.length - barW)/2;
+    const barH = (val / max) * (h - 80);
+    const y = h - padding - barH;
+    // gradient gold
+    const g = ctx.createLinearGradient(x,y,x,y+barH);
+    g.addColorStop(0, 'rgba(201,166,75,0.95)');
+    g.addColorStop(1, 'rgba(201,166,75,0.55)');
+    ctx.fillStyle = g;
+    roundRect(ctx, x, y, barW, barH, 6, true, false);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(labels[i], x, h - padding + 14);
+    ctx.fillText(String(val), x, y - 6);
+  });
+}
+function roundRect(ctx, x, y, w, h, r, fill, stroke){
+  if (r === undefined) r = 5;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+  if(fill) ctx.fill();
+  if(stroke) ctx.stroke();
+}
+
+/* -------------- Students list render -------------- */
+function renderStudents(){
+  const tbody = document.querySelector('#studentsTable tbody');
+  tbody.innerHTML = '';
+  if(students.length === 0){
+    tbody.innerHTML = '<tr><td colspan="6" class="muted">No students yet.</td></tr>'; return;
+  }
+  students.slice().reverse().forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><img class="thumb" src="${s.photo || placeholder()}" alt="photo"></td>
+      <td>${s.studentId}</td>
+      <td>${escapeHtml(s.studentName)}</td>
+      <td>${escapeHtml(s.grade)}</td>
+      <td>${s.paymentVerified ? '✅' : '—'}</td>
+      <td>
+        <button class="ghost" onclick="viewStudent('${s.id}')">View</button>
+        <button class="ghost" onclick="editStudent('${s.id}')">Edit</button>
+        <button class="ghost" onclick="deleteStudent('${s.id}')">Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+function placeholder(){ return 'data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"56\" height=\"40\"></svg>'; }
+function escapeHtml(t){ if(!t) return ''; return String(t).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":\"&#39;\"}[c])); }
+
+window.viewStudent = function(id){
+  const s = students.find(x=>x.id===id);
+  if(!s) return alert('Not found');
+  let txt = `Name: ${s.studentName}\nID: ${s.studentId}\nGrade: ${s.grade}\nDOB: ${formatDate(s.dob)}\nContact: ${s.contact || '—'}\nPayment: ${s.paymentVerified ? 'Verified' : 'Not verified'}`;
+  alert(txt);
+};
+window.editStudent = function(id){
+  const s = students.find(x=>x.id===id);
+  if(!s) return alert('Not found');
+  document.getElementById('studentName').value = s.studentName;
+  document.getElementById('dob').value = s.dob || '';
+  document.getElementById('gender').value = s.gender || '';
+  document.getElementById('grade').value = s.grade || '';
+  document.getElementById('contact').value = s.contact || '';
+  document.getElementById('admitDate').value = s.admitDate || '';
+  // remove old on save then re-add (simple edit flow)
+  students = students.filter(x=>x.id!==id);
+  saveAll();
+  renderStudents();
+  showPanel('register');
+};
+window.deleteStudent = function(id){
+  if(!confirm('Delete student?')) return;
+  students = students.filter(x=>x.id!==id);
+  saveAll(); updateDashboard(); renderStudents();
+};
+
+/* -------------- Registration submit -------------- */
+document.getElementById('regForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const name = document.getElementById('studentName').value.trim();
+  const dob = document.getElementById('dob').value;
+  const gender = document.getElementById('gender').value;
+  const grade = document.getElementById('grade').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+  const admitDate = document.getElementById('admitDate').value;
+  const file = document.getElementById('photo').files[0];
+  if(!name || !dob || !gender || !grade){ return alert('Fill required fields'); }
+  let photo = null;
+  if(file) photo = await fileToBase64(file);
+  const newS = { id: cryptoId(), studentId: generateStudentId(), studentName: name, dob, gender, grade, contact, admitDate, photo, paymentVerified:false, paymentInfo:null };
+  students.push(newS);
+  saveAll(); renderStudents(); updateDashboard(); ev.target.reset();
+  alert('Student saved: ' + newS.studentId);
+});
+
+/* -------------- Payments submit -------------- */
+document.getElementById('payForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const studentRef = document.getElementById('pStudent').value.trim();
+  const bank = document.getElementById('pBank').value.trim();
+  const ref = document.getElementById('pRef').value.trim();
+  const amount = document.getElementById('pAmount').value;
+  const date = document.getElementById('pDate').value;
+  const file = document.getElementById('pImage').files[0];
+  if(!studentRef || !bank || !ref || !amount || !date || !file) return alert('Fill all fields');
+  const img = await fileToBase64(file);
+  const p = { id: cryptoId(), studentRef, bank, ref, amount, date, img, status:'Pending', reviewedBy:null, reviewedAt:null };
+  payments.push(p); saveAll();
+  document.getElementById('pResult').textContent = 'Payment submitted — awaiting admin review';
+  document.getElementById('payForm').reset();
+  updateDashboard();
+});
+
+/* -------------- Gallery -------------- */
+document.getElementById('uploadGallery').addEventListener('click', async ()=>{
+  const input = document.getElementById('galleryInput');
+  if(!input.files || input.files.length === 0) return alert('Choose image(s)');
+  for(const f of input.files){
+    const data = await fileToBase64(f);
+    gallery.push({id: cryptoId(), img: data});
+  }
+  localStorage.setItem(KEY_GALLERY, JSON.stringify(gallery));
+  input.value = '';
+  renderGallery();
+});
+document.getElementById('clearGallery').addEventListener('click', ()=>{
+  if(!confirm('Clear gallery?')) return;
+  gallery = []; localStorage.setItem(KEY_GALLERY, JSON.stringify(gallery)); renderGallery();
+});
+
+function renderGallery(){
+  const grid = document.getElementById('galleryGrid'); grid.innerHTML = '';
+  if(gallery.length === 0){ grid.innerHTML = '<div class="muted">No images yet.</div>'; return; }
+  gallery.slice().reverse().forEach(g=>{
+    const img = document.createElement('img');
+    img.src = g.img;
+    grid.appendChild(img);
+  });
+}
+
+/* -------------- Admin: login + payments table -------------- */
+const ADMIN_PW = 'admin123'; // demo only
+document.getElementById('adminLogin').addEventListener('click', ()=>{
+  const pw = document.getElementById('adminPw').value;
+  if(pw === ADMIN_PW){ adminLogged = true; document.getElementById('adminGate').style.display='none'; document.getElementById('adminPanel').style.display=''; renderPaymentsTable(); showPanel('admin'); }
+  else alert('Incorrect password');
+});
+document.getElementById('logoutAdmin').addEventListener('click', ()=>{ adminLogged=false; document.getElementById('adminPw').value=''; showPanel('dashboard'); });
+
+function renderPaymentsTable(){
+  const tbody = document.querySelector('#paymentsTable tbody');
+  tbody.innerHTML = '';
+  if(payments.length === 0){ tbody.innerHTML = '<tr><td colspan="7" class="muted">No payments</td></tr>'; return; }
+  payments.slice().reverse().forEach(p=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><img class="thumb" src="${p.img}"></td>
+      <td>${escapeHtml(p.studentRef)}</td>
+      <td>${escapeHtml(p.bank)}<br><small>${escapeHtml(p.ref)}</small></td>
+      <td>${escapeHtml(p.amount)}</td>
+      <td>${formatDate(p.date)}</td>
+      <td>${p.status}</td>
+      <td>
+        <button class="ghost" onclick="viewPayment('${p.id}')">View</button>
+        <button class="ghost" onclick="approve('${p.id}')">Approve</button>
+        <button class="ghost" onclick="reject('${p.id}')">Reject</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+window.viewPayment = function(id){
+  const p = payments.find(x=>x.id===id); if(!p) return alert('Not found');
+  const w = window.open('', '_blank');
+  w.document.write(`<img src="${p.img}" style="max-width:800px"><p>Student Ref: ${escapeHtml(p.studentRef)}<br>Bank: ${escapeHtml(p.bank)}<br>Ref: ${escapeHtml(p.ref)}<br>Amount: ${escapeHtml(p.amount)}<br>Date: ${formatDate(p.date)}<br>Status: ${p.status}</p>`);
+};
+
+window.approve = function(id){
+  if(!confirm('Approve this payment?')) return;
+  const p = payments.find(x=>x.id===id); if(!p) return;
+  p.status = 'Approved'; p.reviewedBy='admin'; p.reviewedAt=new Date().toISOString();
+  // match student by ID or name
+  const s = students.find(s => s.studentId === p.studentRef || s.studentName.toLowerCase() === p.studentRef.toLowerCase());
+  if(s){ s.paymentVerified = true; s.paymentInfo = { bank: p.bank, ref: p.ref, amount: p.amount, date: p.date, img: p.img }; saveAll(); }
+  localStorage.setItem(KEY_PAYMENTS, JSON.stringify(payments)); renderPaymentsTable(); renderStudents(); updateDashboard(); alert('Approved. Student updated if matched.');
+};
+
+window.reject = function(id){
+  if(!confirm('Reject this payment?')) return;
+  const p = payments.find(x=>x.id===id); if(!p) return;
+  p.status = 'Rejected'; p.reviewedBy='admin'; p.reviewedAt=new Date().toISOString();
+  localStorage.setItem(KEY_PAYMENTS, JSON.stringify(payments)); renderPaymentsTable(); updateDashboard(); alert('Rejected.');
+};
+
+/* -------------- Verification -------------- */
+document.getElementById('verifyBtn').addEventListener('click', ()=>{
+  const q = document.getElementById('verifyInput').value.trim();
+  const out = document.getElementById('verifyResult');
+  if(!q){ out.innerHTML = '<span class="muted">Enter Student ID or name.</span>'; return; }
+  const match = students.find(s => s.studentId === q || s.studentName.toLowerCase() === q.toLowerCase());
+  if(!match){ out.innerHTML = '<div style="color:#ff6b6b">❌ Not found</div>'; return; }
+  let html = `<div style="font-weight:700;color:var(--gold)">${escapeHtml(match.studentName)} — ${escapeHtml(match.studentId)}</div>`;
+  html += `<div class="muted">Grade: ${escapeHtml(match.grade)} | DOB: ${formatDate(match.dob)}</div>`;
+  if(match.paymentVerified) html += `<div style="margin-top:8px;color:#7ef77e">Payment Verified (${formatDate(match.paymentInfo?.date)})</div>`;
+  else html += `<div style="margin-top:8px;color:#ffd66b">Payment not verified</div>`;
+  out.innerHTML = html;
+});
+
+/* -------------- Exports -------------- */
+document.getElementById('exportStudents').addEventListener('click', ()=>{
+  if(students.length===0) return alert('No students');
+  const rows = [['studentId','studentName','dob','gender','grade','contact','admitDate','paymentVerified']];
+  students.forEach(s => rows.push([s.studentId,s.studentName,s.dob,s.gender,s.grade,s.contact,s.admitDate,s.paymentVerified? 'yes':'no']));
+  downloadCSV(rows, 'vefs-students.csv');
+});
+document.getElementById('exportPayments').addEventListener('click', ()=>{
+  if(payments.length===0) return alert('No payments');
+  const rows = [['studentRef','bank','ref','amount','date','status','reviewedBy','reviewedAt']];
+  payments.forEach(p => rows.push([p.studentRef,p.bank,p.ref,p.amount,p.date,p.status,p.reviewedBy||'',p.reviewedAt||'']));
+  downloadCSV(rows, 'vefs-payments.csv');
+});
+function downloadCSV(rows, filename){
+  const csv = rows.map(r => r.map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
+}
+
+/* -------------- Utilities & initial render -------------- */
+function renderPayments(){
+  // used elsewhere for admin view
+  if(adminLogged) renderPaymentsTable();
+}
+function renderStudents(){ renderStudents = renderStudents; } // placeholder (function redefined above)
+
+function initialRender(){
+  // ensure variable references ok
+  renderStudents = function(){ // redefined properly here
+    const tbody = document.querySelector('#studentsTable tbody'); tbody.innerHTML = '';
+    if(students.length === 0){ tbody.innerHTML = '<tr><td colspan="6" class="muted">No students yet.</td></tr>'; return; }
+    students.slice().reverse().forEach(s=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><img class="thumb" src="${s.photo || placeholder()}" alt="photo"></td>
+        <td>${s.studentId}</td>
+        <td>${escapeHtml(s.studentName)}</td>
+        <td>${escapeHtml(s.grade)}</td>
+        <td>${s.paymentVerified ? '✅' : '—'}</td>
+        <td>
+          <button class="ghost" onclick="viewStudent('${s.id}')">View</button>
+          <button class="ghost" onclick="editStudent('${s.id}')">Edit</button>
+          <button class="ghost" onclick="deleteStudent('${s.id}')">Delete</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  };
+  renderStudents();
+  renderGallery();
+  applyLogo();
+  updateDashboard();
+  renderPaymentsTable();
+}
+initialRender();
+
+/* -------------- Misc UI controls -------------- */
+document.getElementById('regReset').addEventListener('click', ()=> document.getElementById('regForm').reset());
+document.getElementById('viewAllPayments').addEventListener('click', ()=> { showPanel('admin'); document.getElementById('adminPw').value = ''; });
+document.getElementById('exportStudents').addEventListener('click', ()=>{}); // already bound above
+
+// ensure dashboard shown on start
+showPanel('dashboard');
+</script>
+</body>
+</html>
